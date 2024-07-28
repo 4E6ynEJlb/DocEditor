@@ -35,7 +35,7 @@ namespace DocEditor
             }
             catch (Exception ex)
             {
-                new Task(() => MessageBox.Show(ex.Message, "ти зачэм паграму убитой сдэлал?", MessageBoxButtons.OK, MessageBoxIcon.Error)).Start();
+                new Task(() => MessageBox.Show(ex.Message, "смэрть", MessageBoxButtons.OK, MessageBoxIcon.Error)).Start();
                 label1.Show();
                 label2.Show();
                 trackBar1.Show();
