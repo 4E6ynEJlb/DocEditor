@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
@@ -12,6 +6,11 @@ namespace DocEditor.Services
 {
     public class ParsingService
     {
+        /// <summary>
+        /// Сервис для парсинга документа в XML
+        /// </summary>
+        /// <param name="controls">Элементы управления из сервиса редактирования</param>
+        /// <param name="files">Прикрепленные сервисы</param>
         public ParsingService(List<Control> controls, List<string> files) 
         {
             Files = files;
@@ -25,7 +24,10 @@ namespace DocEditor.Services
         DataGridView Table;
         XNamespace NameSpace = "http://www.w3.org/1999/xhtml";
         [XmlAttribute("xmlns", DataType = "language")]
-        public string attrLang = "ru";
+        string attrLang = "ru";
+        /// <summary>
+        /// Запускает парсер и сохраняет документ
+        /// </summary>
         public void Parse()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -48,7 +50,7 @@ namespace DocEditor.Services
             xDocument.Save(filename);
             new Task(() => MessageBox.Show("Готово")).Start();
         }
-        private XElement ParseContent()//content
+        private XElement ParseContent()//Парсит элемент "content"
         {
             var content = new List<XElement>();
             foreach ( var section in Sections ) 
@@ -58,7 +60,7 @@ namespace DocEditor.Services
             XElement xElement = new XElement(NameSpace + "content", content.ToArray());
             return xElement;
         }
-        private XElement ParseSection(RichTextBox richTextBox)
+        private XElement ParseSection(RichTextBox richTextBox)//Парсит секцию ("p" + "b", "i", "u")
         {
             int sectionIndex = int.Parse(richTextBox.Name.Substring(11));
             List<Control> checkBoxes = CheckBoxes.Where(c => c.Name.Contains(sectionIndex.ToString())).ToList();
@@ -84,7 +86,7 @@ namespace DocEditor.Services
             }
             return xElement;
         }
-        private XElement ParseTable()
+        private XElement ParseTable()//Парсит таблицу ("table")
         {
             List<XElement> rows = new List<XElement>();
             for (int rowIndex = 0; rowIndex < Table.RowCount; rowIndex++)
@@ -93,7 +95,7 @@ namespace DocEditor.Services
             }
             return new XElement(NameSpace + "table", new XAttribute("border", 1), new XElement(NameSpace + "tbody", rows.ToArray()));
         }
-        private XElement ParseRow(int rowIndex)
+        private XElement ParseRow(int rowIndex)//Парсит строку в таблице ("tr")
         {
             List<XElement> cells = new List<XElement>();
             for (int cell = 0; cell < Table.ColumnCount; cell++)
@@ -103,7 +105,7 @@ namespace DocEditor.Services
             }
             return new XElement(NameSpace + "tr", cells.ToArray());
         }
-        private XElement ParseApplications()//applications
+        private XElement ParseApplications()//Парсит элемент "applications"
         {
             List<XElement> applications = new List<XElement>();
             foreach (string filename in Files)
@@ -112,7 +114,7 @@ namespace DocEditor.Services
             }
             return new XElement(NameSpace + "applications", applications.ToArray());
         }
-        private XElement ParseApplication(string path)
+        private XElement ParseApplication(string path)//Парсит прикрепленный документ ("application")
         {
             byte[] bytes = File.ReadAllBytes(path);
             string fileBase64 = Convert.ToBase64String(bytes);
@@ -123,7 +125,7 @@ namespace DocEditor.Services
                     new XElement(NameSpace + "a", new XAttribute("download", filename), new XAttribute("href", "data:application/msword;base64," + fileBase64), 
                         new XElement(NameSpace + "name", filename)));
         }
-        private XElement ParseStyle()
+        private XElement ParseStyle()//Парсит элемент "style"
         {
             string Workdir = Directory.GetCurrentDirectory();
             string style = File.ReadAllText(Workdir + "\\Style.txt");

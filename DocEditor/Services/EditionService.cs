@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Awesomium.Windows.Forms;
-namespace DocEditor.Services
+﻿namespace DocEditor.Services
 {
     public class EditionService
     {
+        /// <summary>
+        /// Сервис для модификации формы изменения, инициализации парсера и сохранения созданного документа
+        /// </summary>
+        /// <param name="sectionsCount">Кол-во секций текста</param>
+        /// <param name="tableUsed">Наличие таблицы</param>
+        /// <param name="editionForm"></param>
+        /// <exception cref="ArgumentException">Выбрасывается при создании документа без секций и таблицы, т.е. заведомо пустого документа</exception>
         public EditionService(int sectionsCount, bool tableUsed, EditionForm editionForm)
         {
             SectionsCount = sectionsCount;
             TableUsed = tableUsed;
             _EditionForm = editionForm;
             if (sectionsCount == 0 && !tableUsed)
-                throw new Exception("Смысл создавать документ, если в нем ничего не будет?");
+                throw new ArgumentException("Смысл создавать документ, если в нем ничего не будет?");
             EditionFormStartSize = _EditionForm.Size;
             ResizeWindow();
             AddControls();  
@@ -26,22 +26,23 @@ namespace DocEditor.Services
         int WindowWidth = 500;
         int SectionHeight = 100;
         int SectionWidth = 400;
-        int DelimiterSize = 10;
+        int DelimiterSize = 10;//Пробелы между элементами управления
         int ButtonHeight = 23;
         int ButtonWidth = 85;
         int TableHeight = 200;
         int TableWidth = 450;
         int CheckBoxHeight = 19;
         int CheckBoxWidth = 35;
-        int RemoveButtonSize = 20;
-        int FilesAttached = 0;
-        int AttachedFileCoordY = 0;
+        int RemoveButtonSize = 20;//Размер квадратной кнопки с крестиком
+        int AttachedFileCoordY = 0;//Координата У для размещения информации о прикрепленном файле
         bool TableUsed;
-        bool WindowHeightMax = false;
         EditionForm _EditionForm;
-        Size EditionFormStartSize;
-        List<Control> Controls = new List<Control>();
+        Size EditionFormStartSize;//Размеры формы редактирования перед модификацией
+        List<Control> Controls = new List<Control>();//Создаваемые в сервисе элементы управления
         List<string> AttachedFiles = new List<string>();
+        /// <summary>
+        /// Изменяет размер формы во время модификации
+        /// </summary>
         void ResizeWindow()
         {            
             WindowHeight = DelimiterSize * (3 + SectionsCount) + (TableUsed ? DelimiterSize + TableHeight : 0) + SectionsCount * SectionHeight + ButtonHeight * 2 + 40;
@@ -50,10 +51,12 @@ namespace DocEditor.Services
             {
                 WindowHeight = MonitorHeight;
                 _EditionForm.AutoScroll = true;
-                WindowHeightMax = true;
             }
             _EditionForm.Size = new Size(WindowWidth, WindowHeight);
         }
+        /// <summary>
+        /// Добавляет элементы управления во время модификации
+        /// </summary>
         void AddControls()
         {
             int yCoord = DelimiterSize;
@@ -126,6 +129,11 @@ namespace DocEditor.Services
             AttachedFileCoordY = yCoord + ButtonHeight + DelimiterSize;
             Controls.Add(attachButton);
         }
+        /// <summary>
+        /// Добавляет чекбоксы "Ж", "К", "Ч" рядом с секцией
+        /// </summary>
+        /// <param name="yCoord">Координата У секции</param>
+        /// <param name="sectionIndex">Индекс секции</param>
         void AddCheckBoxes(int yCoord, int sectionIndex)
         {
             CheckBox checkBoxJ = new CheckBox()
@@ -165,7 +173,11 @@ namespace DocEditor.Services
             };
             Controls.Add(checkBoxCh);
         }
-        void AddAttachedFileControls(string filename)
+        /// <summary>
+        /// Добавляет кнопку удаления и путь к файлу на форму
+        /// </summary>
+        /// <param name="filepath">Путь к файлу</param>
+        void AddAttachedFileControls(string filepath)
         {
             if (!_EditionForm.AutoScroll)
             {
@@ -180,7 +192,7 @@ namespace DocEditor.Services
                     _EditionForm.Size = new Size(WindowWidth, WindowHeight);
                 }
             }
-            Guid fileGuid = Guid.NewGuid();
+            Guid fileGuid = Guid.NewGuid();//Guid, связывающий кнопку с меткой в имени 
             Button button = new Button()
             {
                 Parent = _EditionForm,
@@ -203,7 +215,7 @@ namespace DocEditor.Services
             {
                 Parent = _EditionForm,
                 Font = new Font("Segoe UI", 7F),
-                Text = filename,
+                Text = filepath,
                 AutoSize = true,
                 Location = new Point(DelimiterSize + RemoveButtonSize, AttachedFileCoordY),
                 Name = "fileLabel: " + fileGuid,
@@ -212,7 +224,7 @@ namespace DocEditor.Services
             AttachedFileCoordY += DelimiterSize + RemoveButtonSize;
             Controls.Add(label);
         }
-        void removeFileButton_Click(object sender, EventArgs e)
+        void removeFileButton_Click(object sender, EventArgs e)//Клик по кнопке для открепления файла
         {
             Button button = (Button)sender;
             Guid fileGuid = Guid.Parse(button.Name.Substring(18));
@@ -243,7 +255,7 @@ namespace DocEditor.Services
                 _EditionForm.Size = size;
             }
         }
-        void backButton_Click(object sender, EventArgs e)
+        void backButton_Click(object sender, EventArgs e)//Кнопка "Назад"
         {
             _EditionForm.label1.Show();
             _EditionForm.label2.Show();
@@ -257,7 +269,7 @@ namespace DocEditor.Services
                 control.Hide();
             }
         }
-        void attachButton_Click(object sender, EventArgs e)
+        void attachButton_Click(object sender, EventArgs e)//Кнопка "Прикрепить файл"
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Documents|*.doc;*.docx";
@@ -267,13 +279,13 @@ namespace DocEditor.Services
             AttachedFiles.Add(filename);
             AddAttachedFileControls(filename);
         }
-        void saveButton_Click(object sender, EventArgs e)
+        void saveButton_Click(object sender, EventArgs e)//Кнопка "Сохранить"
         {
             ParsingService parsingService = new ParsingService(Controls, AttachedFiles);
             parsingService.Parse();
             _EditionForm.Close();
         }
-        void dataGridViev_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        void dataGridViev_CellValueChanged(object sender, DataGridViewCellEventArgs e)//Обработчик события изменения ячейки таблицы. По мере необходимости увеличивает число столбцов
         {
             DataGridView dataGridView = (DataGridView)sender;
             if (dataGridView.ColumnCount <= e.ColumnIndex + 1)

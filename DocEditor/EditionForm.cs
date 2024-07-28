@@ -1,17 +1,8 @@
 ﻿using DocEditor.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace DocEditor
 {
-    public partial class EditionForm : Form
+    public partial class EditionForm : Form //Форма редактирования документа
     {
         StartForm _StartForm;
         EditionService _EditionService;
@@ -22,7 +13,7 @@ namespace DocEditor
             startForm.Hide();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e) //Кнопка "Создать"
         {
             try
             {
@@ -35,7 +26,7 @@ namespace DocEditor
             }
             catch (Exception ex)
             {
-                new Task(() => MessageBox.Show(ex.Message, "смэрть", MessageBoxButtons.OK, MessageBoxIcon.Error)).Start();
+                MessageBox.Show(this, ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 label1.Show();
                 label2.Show();
                 trackBar1.Show();

@@ -1,28 +1,15 @@
 ﻿using Microsoft.Web.WebView2.WinForms;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 using System.Drawing.Printing;
 using Spire.Doc;
-using Spire.Doc.License;
 namespace DocEditor
 {
-    public partial class BrowserForm : Form
+    public partial class BrowserForm : Form //Форма отображения документа
     {
-        public BrowserForm(string filename, StartForm startForm)
+        public BrowserForm(string filepath, StartForm startForm)
         {
             InitializeComponent();
-            Filename = filename;
+            Filepath = filepath;
             Size = Screen.PrimaryScreen.Bounds.Size;
             Browser = new WebView2()
             {
@@ -30,29 +17,33 @@ namespace DocEditor
                 Location = new Point(0, 0),
                 Size = new Size(Size.Width, Size.Height - 40),
                 Visible = true,
-                Source = new Uri(Filename),
+                Source = new Uri(Filepath),
             };
             _StartForm = startForm;
             startForm.Hide();
             CreateButtons();
-            int slashIndex = filename.LastIndexOf("\\");
+            int slashIndex = filepath.LastIndexOf("\\");
             _Label = new Label()
             {
                 Parent = Browser,
                 Location = new Point(0, 0),
                 AutoSize = true,
                 Visible = true,
-                Text = filename.Substring(slashIndex + 1)
+                Text = filepath.Substring(slashIndex + 1)
             };
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
         }
-        string Filename;
+        string Filepath;
         WebView2 Browser;
         Label _Label;
         StartForm _StartForm;
         Button BackButton;
         Button PrintButton;
+        XNamespace _XNameSpace = "http://www.w3.org/1999/xhtml";
+        /// <summary>
+        /// Создает кнопки на форме
+        /// </summary>
         void CreateButtons()
         {
             BackButton = new Button()
@@ -76,11 +67,11 @@ namespace DocEditor
             };
             PrintButton.Click += PrintButton_Click;
         }
-        private void BackButton_Click(object sender, EventArgs e)
+        private void BackButton_Click(object sender, EventArgs e)//Кнопка "Назад"
         {
             Close();
         }
-        private void PrintButton_Click(object sender, EventArgs e)
+        private void PrintButton_Click(object sender, EventArgs e)//Кнопка "Печать"
         {
             Browser.CoreWebView2.ShowPrintUI();
             PrintApplications();
@@ -89,18 +80,17 @@ namespace DocEditor
         {
             _StartForm.Show();
         }
-        XNamespace NameSpace = "http://www.w3.org/1999/xhtml";
-        void PrintApplications()
+        void PrintApplications()//Печатает приложения
         {
-            XDocument xDocument = XDocument.Load(Filename);
-            if (xDocument.Element(NameSpace + "htmlx").Element(NameSpace + "body2").Element(NameSpace + "container").Element(NameSpace + "applications").Elements(NameSpace + "application").Count() == 0)
+            XDocument xDocument = XDocument.Load(Filepath);
+            if (xDocument.Element(_XNameSpace + "htmlx").Element(_XNameSpace + "body2").Element(_XNameSpace + "container").Element(_XNameSpace + "applications").Elements(_XNameSpace + "application").Count() == 0)
                 return;
-            var dialogResult = MessageBox.Show(this, "Печать приложения необходима?", "Печать приложения", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var dialogResult = MessageBox.Show(this, "Печать приложений необходима?", "Печать приложений", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dialogResult == DialogResult.No)
                 return;
-            foreach (XElement element in xDocument.Element(NameSpace + "htmlx").Element(NameSpace + "body2").Element(NameSpace + "container").Element(NameSpace + "applications").Elements(NameSpace + "application"))
+            foreach (XElement element in xDocument.Element(_XNameSpace + "htmlx").Element(_XNameSpace + "body2").Element(_XNameSpace + "container").Element(_XNameSpace + "applications").Elements(_XNameSpace + "application"))
             {
-                XElement application = element.Element(NameSpace + "a");
+                XElement application = element.Element(_XNameSpace + "a");
                 XAttribute href = application.Attribute("href");
                 string hrefValue = href.Value;
                 string base64String = hrefValue.Replace("data:application/msword;base64,", "");
