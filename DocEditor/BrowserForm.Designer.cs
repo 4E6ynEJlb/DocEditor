@@ -36,7 +36,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Name = "BrowserForm";
-            Text = "BrowserForm";
+            Text = "Этого все равно не будет видно.";
             FormClosing += BrowserForm_FormClosing;
             ResumeLayout(false);
         }

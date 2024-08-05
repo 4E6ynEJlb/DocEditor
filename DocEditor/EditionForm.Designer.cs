@@ -101,7 +101,7 @@
             Controls.Add(label1);
             Controls.Add(trackBar1);
             Name = "EditionForm";
-            Text = "CreationForm";
+            Text = "Редактирование";
             FormClosing += CreationForm_FormClosing;
             ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
             ResumeLayout(false);

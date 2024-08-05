@@ -75,7 +75,7 @@
             Controls.Add(button2);
             Controls.Add(button1);
             Name = "StartForm";
-            Text = "Form1";
+            Text = "Редактор документов";
             ResumeLayout(false);
         }
 

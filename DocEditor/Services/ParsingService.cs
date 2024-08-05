@@ -43,6 +43,14 @@ namespace DocEditor.Services
                             ParseContent(),
                             ParseApplications(),
                             ParseStyle()
+                        ),
+                        new XElement(NameSpace + "servinfo", 
+                            new XElement(NameSpace + "signaturesxml"),
+                            new XElement(NameSpace + "idgosuslug"),
+                            new XElement(NameSpace + "resultgosuslug"),
+                            new XElement(NameSpace + "idxml"),
+                            new XElement(NameSpace + "timestampout"),
+                            new XElement(NameSpace + "timestampin")
                         )
                     )
                 )
